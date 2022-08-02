@@ -56,6 +56,33 @@ async function changeLightbulb( changerToken ) {
 //------------------------------------------------------ User ------------------------------------------------------
 //--- Delete User
 async function deleteUser( token ) {
+  console.log( 'Deleting the user with the name: "' + users[ token ].name + '", color: "' + users[ token ].color + '"' );
+
+  const response = {
+    action: 'disconnect',
+    username: users[ token ].name,
+    color: users[ token ].color
+  };
+
+  //Delete from DynamoDB
+  console.log( 'Saving new user on DynamoDB' );
+  try {
+    await dynamo.delete( {
+      ...dynamoDBArgs,
+      Key: {
+        token: token
+      }
+    } ).promise();
+    console.log( 'User "' + users[ token ].name + '" deleted correctly from DynamoDB' );
+  } catch ( err ) {
+    console.error( 'Error trying to delete the user "' + users[ token ].name + '" from DynamoDB' );
+    console.error( err );
+  }
+
+  delete users[ token ];
+  delete usersConnectionId[ token ];
+
+  await sendToClients( response );
 }
 
 //--- User Create
