@@ -57,11 +57,158 @@ function createSocket() {
     onSocketError( event );
   } );
   socket.addEventListener( 'message', ( event ) => {
-    //onSocketMessage( event.data );
+    onSocketMessage( event.data );
   } );
 }
 
 createSocket();
+
+//------------------------------------------------------ createLog ------------------------------------------------------
+function createLog( type, data ) {
+  logHTMLStructure = {};
+
+  //Templates
+  logHTMLStructure[ 'connect' ] = '<p style="color:{{COLOR}};"><i class="bi bi-check-circle-fill"></i> <img src="{{USER-IMAGE}}" height="35"> <b>The user "{{NAME}}" join the room at {{DATE}} :)</b></p>';
+  logHTMLStructure[ 'disconnect' ] = '<p style="color:{{COLOR}};"><i class="bi bi-exclamation-triangle"></i> <img src="{{USER-IMAGE}}" height="35"> <b>The user "{{NAME}}" left the room at {{DATE}} :(</b></p>';
+  logHTMLStructure[ 'change' ] = '<p><img src="{{USER-IMAGE}}" height="35"> <span style="color:{{COLOR}};"><b>{{NAME}}</b></span> <span class="{{ACTION-COLOR-CLASS}}"><b>{{ACTION}}</b></span> <i>Lightbulb at {{DATE}}</i></p>';
+
+
+  const ul = document.querySelector( '#logs' );
+  let log = logHTMLStructure[ type ];
+  try {
+    log = log.replace( '{{USER-IMAGE}}', data.image );
+    log = log.replace( '{{COLOR}}', data.color );
+    log = log.replace( '{{NAME}}', data.username );
+    log = log.replace( '{{ACTION-COLOR-CLASS}}', data.actionColorClass );
+    log = log.replace( '{{ACTION}}', data.actionText );
+    log = log.replace( '{{DATE}}', data.date );
+  } catch ( err ) {}
+
+  const li = document.createElement( 'li' );
+  li.innerHTML = log;
+  ul.prepend( li );
+}
+
+//------------------------------------------------------ Manage Server Message ------------------------------------------------------
+const lightbulbButtonElement = document.querySelector( '#lightbulb-button' );
+
+//--- changeLightbulbSvg ---
+function changeLightbulbSvg( status ) {
+  const lightbulbImageElement = document.querySelector( '#lightbulb' );
+  const lightbulbButtonTextElement = document.querySelector( '#lightbulb-button-text b' );
+
+  const body = document.querySelector( 'body' );
+
+  if ( status === true ) {
+    body.style.color = 'black';
+    body.style.backgroundColor = 'white';
+    lightbulbImageElement.src = lightbulbImgOnPath;
+    lightbulbButtonElement.checked = true;
+    lightbulbButtonTextElement.innerHTML = 'Turn Off';
+  } else if ( status === false ) {
+    body.style.color = 'white';
+    body.style.backgroundColor = 'black';
+    lightbulbImageElement.src = lightbulbImgOffPath;
+    lightbulbButtonElement.checked = false;
+    lightbulbButtonTextElement.innerHTML = 'Turn On';
+  }
+}
+
+//--- lightbulbChanged ---
+function lightbulbChanged( data ) {
+  if ( data.status === true ) {
+    data.actionColorClass = 'text-warning';
+    data.actionText = 'turned on';
+  } else if ( data.status === false ) {
+    data.actionColorClass = 'text-dark';
+    data.actionText = 'turned off';
+  }
+
+  changeLightbulbSvg( data.status );
+  createLog( 'change', data );
+}
+
+//--- lightbulbChangeReceivedByServer --- (When the server responses your message)
+function lightbulbChangeReceivedByServer() {
+  console.log( 'The server answer your message' );
+  requestSent = false;
+  lightbulbButtonElement.disabled = false;
+}
+
+//--- userDisconnected --- (When a user disconnects)
+function userDisconnected( data ) {
+  createLog( 'disconnect', data );
+}
+
+//--- userConnected --- (When a user connects)
+function userConnected( data ) {
+  createLog( 'connect', data );
+}
+
+//--- setUserData --- (When returned by the Server)
+function setUserData( data, tokenReceived ) {
+  const username = document.querySelector( '#username h1' );
+  username.innerHTML = data.username;
+  const userImage = document.querySelector( '#username img' );
+  userImage.src = data.image;
+
+  token = tokenReceived;
+  sessionStorage.setItem( 'token', tokenReceived );
+
+  changeLightbulbSvg( data.status );
+}
+
+//--- onSocketMessage ---
+function onSocketMessage( dataStr ) {
+  const data = JSON.parse( dataStr );
+
+  console.log( 'Data received from Server' );
+  console.log( data );
+
+  if ( data.message === 'Internal server error' ) {
+    requestSent = false;
+    socket.close();
+    return;
+  }
+
+  const action = data.action;
+  const userImageSrc = 'https://robohash.org/' + data.username + '.png';
+  const date = new Date().toString();
+  const tokenReceived = data.token;
+
+  const parsedData = { //Parsing the received data
+    image: userImageSrc,
+    username: data.username,
+    color: data.color,
+    date: date,
+    status: data.status
+  };
+
+  switch( action ) {
+    case 'connect':
+      userConnected( parsedData );
+    break;
+
+    case 'identification':
+      setUserData( parsedData, tokenReceived );
+    break;
+
+    case 'disconnect':
+      userDisconnected( parsedData );
+    break;
+
+    case 'change':
+      lightbulbChanged( parsedData );
+    break;
+
+    case 'changeReceivedByServer':
+      lightbulbChangeReceivedByServer();
+    break;
+
+    default:
+      console.log( 'Action "' + action + '" unknown' );
+  }
+}
 
 //------------------------------------------------------ sendChangeLightbulbToServer ------------------------------------------------------
 let requestSent = false;
