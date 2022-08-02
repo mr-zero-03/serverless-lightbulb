@@ -16,7 +16,13 @@
       <h1>LIGHTBULB</h1>
     </section>
 
-    <section id="lightbulb-section">
+    <section id="spinner" class="d-flex justify-content-center align-items-center position-absolute top-0 start-0 splash-spinner-container">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+    </section>
+
+    <section id="lightbulb-section" class="d-none">
       <section onclick="sendChangeLightbulbToServer();">
         <picture class="d-flex justify-content-center pt-4 pb-3">
           <img id="lightbulb" src="assets/img/light-bulb-off.svg" alt="lightbulb" height="300">
