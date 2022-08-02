@@ -51,6 +51,23 @@ async function sendToClients( response ) {
 //------------------------------------------------------ Lightbulb ------------------------------------------------------
 //-- changeLightbulb
 async function changeLightbulb( changerToken ) {
+  lightbulb = !lightbulb;
+
+  const response = {
+    action: 'change',
+    username: users[ changerToken ].name,
+    color: users[ changerToken ].color,
+    status: lightbulb
+  };
+
+  await sendToClients( response );
+
+  const responseToChanger = {
+    action: 'changeReceivedByServer'
+  };
+  await sendToClient( changerToken, responseToChanger );
+
+  console.log( 'Modifiying Lightblulb' );
 }
 
 //------------------------------------------------------ User ------------------------------------------------------
