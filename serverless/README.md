@@ -5,7 +5,7 @@
  - By default the Serverless Framework creates a S3 Bucket, if you want to set your own Bucket for the deployments, please set the Bucket name on: *provider.deploymentBucket.name*
 
 ## Deploy
-You will have the command *serverless* installed:
+You will need to have the *serverless* command installed:
 ```
 $ npm install -g serverless
 ```
@@ -25,4 +25,10 @@ Once you deploy your project, you will have to go to write the next data on the 
 ```
 TABLENAME=DynamoDBTableName
 ENDPOINT=LINK_OBTAINED_FROM_THE_AWS_WEB_SOCKET_API_GATEWAY
+```
+
+# S3 Static Page
+To upload the client use the command:
+```
+$ serverless s3sync
 ```

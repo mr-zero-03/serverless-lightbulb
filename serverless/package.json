@@ -1,5 +1,6 @@
 {
   "dependencies": {
-    "aws-sdk": "^2.1185.0"
+    "aws-sdk": "^2.1185.0",
+    "serverless-s3-sync": "^3.0.0"
   }
 }

@@ -4,11 +4,22 @@ service: serverless-websockets-lightbulb
 
 frameworkVersion: '3'
 
+plugins:
+  - serverless-s3-sync
+
+custom:
+  s3Sync:
+    noSync: true
+    buckets:
+    - bucketName: YOUR_STATIC_PAGE_S3_BUCKET_NAME
+      bucketPrefix: serverless-lightbulb/
+      localDir: client
+
 provider:
   name: aws
   runtime: nodejs14.x
   deploymentBucket:
-    name: YOUR_S3_BUCKET_NAME
+    name: YOUR_DEPLOYMENT_S3_BUCKET_NAME
   environment:
     DYNAMODB_CUSTOMER_TABLE: ${self:service}-users-${sls:stage}
   iamRoleStatements:
