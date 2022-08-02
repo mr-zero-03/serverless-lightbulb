@@ -1,0 +1,24 @@
+org: YOUR_ORG
+app: serverless-websockets-lightbulb
+service: serverless-websockets-lightbulb
+
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: nodejs14.x
+  deploymentBucket:
+    name: YOUR_S3_BUCKET_NAME
+
+functions:
+  webSocketHandler:
+    handler: index.handler
+    events:
+      - websocket:
+          route: $connect
+      - websocket:
+          route: $disconnect
+      - websocket:
+          route: connectUser
+      - websocket:
+          route: changeLight
