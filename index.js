@@ -2,16 +2,15 @@ const AWS = require( 'aws-sdk' );
 const fs = require( 'fs' );
 const names = require( './libs/names' );
 
-let config = fs.readFileSync( './config/.config', { encoding: 'utf8' } );
-config = config.split( '\n' );
+const config = fs.readFileSync( './config/.config', { encoding: 'utf8' } );
 
-const TABLENAME = config[ 0 ].split( 'TABLENAME=' )[ 1 ];
+const TABLENAME = process.env.DYNAMODB_USERS_TABLE;
 const dynamo = new AWS.DynamoDB.DocumentClient();
 const dynamoDBArgs = {
   TableName: TABLENAME
 }
 
-const ENDPOINT = config[ 1 ].split( 'ENDPOINT=' )[ 1 ];
+const ENDPOINT = config.split( 'ENDPOINT=' )[ 1 ];
 const client = new AWS.ApiGatewayManagementApi( { endpoint: ENDPOINT } );
 
 const users = {};

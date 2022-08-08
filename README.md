@@ -20,10 +20,8 @@ $ serverless deploy
 
 ## Config
 Once you deploy your project, you will have to go to write the next data on the *config/.config* file, you will find it on AWS:
- - The DynamoDB Table Name
  - The AWS API Gateway Endpoint
 ```
-TABLENAME=DynamoDBTableName
 ENDPOINT=LINK_OBTAINED_FROM_THE_AWS_WEB_SOCKET_API_GATEWAY
 ```
 
